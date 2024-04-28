@@ -49,4 +49,32 @@ api.add_resource(Logout,"/logout")
 #     def post(self):
 #         username=request.get_json()["username"]
 #         user=
-  
+@app.before_request()
+def check_if_logged_in():
+    if not session["user_id"] and request.endpoint!="document_list":
+        return {"Error":"Unauthorized user"},401
+class Document(Resource):
+    def get(self,id):
+        if not session["user_id"]:
+            return {"Error":"unauthorized"},401
+        document=Document.query.filter(Document.id==id).first()
+        return document.to_dict()
+    def patch(self, id):
+
+        if not session['user_id']:
+            return {'error': 'Unauthorized'}, 401
+
+        # patch code
+
+    def delete(self, id):
+
+        if not session['user_id']:
+            return {'error': 'Unauthorized'}, 401
+
+class DocumentList(Resource):
+    def get(self):
+        documents=Document.query.all()
+        return [document.to_dict() for document in documents ]    
+
+api.add_resource(Document,"/documents/<int:id>",endpoint="document")
+api.add_resource(DocumentList,"/documents",endpoint="document_list")
